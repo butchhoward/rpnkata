@@ -1,3 +1,6 @@
+rpn
+rpn-test
+
 # Object files
 *.o
 *.ko
@@ -31,3 +34,5 @@
 # Debug files
 *.dSYM/
 *.su
+
+.vscode
