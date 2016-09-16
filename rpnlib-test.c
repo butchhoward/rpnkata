@@ -4,6 +4,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define ck_assert_infix_conversion(INPUT,EXPECTED,ACTUAL) do { \
+  const char* _ck_input = (INPUT); \
+  const char* _ck_expected = (EXPECTED); \
+  const char* _ck_actual = (ACTUAL); \
+  ck_assert_msg(0 == strcmp(_ck_expected, _ck_actual), \
+    "Failed:\nConverting \"%s\"\n Expected: \"%s\"\n Actual  : \"%s\"", _ck_input, _ck_expected, _ck_actual); \
+} while (0)
+
 struct infix_to_postfix {
     const char* infix;
     const char* postfix;
@@ -25,7 +33,7 @@ START_TEST(when_infix_is_then_postfix_is)
 
     rpn_convert_infix_to_postfix(infix_to_postfix_data[_i].infix, actual_postfix);
 
-    ck_assert_str_eq(actual_postfix, infix_to_postfix_data[_i].postfix);
+    ck_assert_infix_conversion(infix_to_postfix_data[_i].infix, infix_to_postfix_data[_i].postfix, actual_postfix );
 
 END_TEST
 
