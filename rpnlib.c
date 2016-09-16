@@ -15,54 +15,12 @@ struct infix_params
     char* postfix_out;
 };
 
-void process_left_paren(struct infix_params* params)
-{
-    params->op_stack[params->op_count++] = *params->infix_in;
-}
+static void process_left_paren(struct infix_params* params);
+static void process_right_paren(struct infix_params* params);
+static void process_variable(struct infix_params* params);
+static void process_operator(struct infix_params *params);
+static void process_operator_stack(struct infix_params *params);
 
-void process_right_paren(struct infix_params* params)
-{
-    for (; params->op_count > 0;)
-    {
-        char op = params->op_stack[--params->op_count];
-        if (params->op_stack[params->op_count] != LEFT_PAREN)
-        {
-            *params->postfix_out++ = op;
-        }
-        else
-        {
-            break;
-        }
-    }
-}
-
-void process_variable(struct infix_params* params)
-{
-    *params->postfix_out++ = *params->infix_in;
-}
-
-void process_operator(struct infix_params *params)
-{
-    char current_op = *params->infix_in;
-    if (params->op_count > 0)
-    {
-        char top_op = params->op_stack[params->op_count - 1];
-        if (top_op == OP_MULT && current_op == OP_ADD)
-        {
-            *params->postfix_out++ = params->op_stack[--params->op_count];
-        }
-    }
-    params->op_stack[params->op_count++] = current_op;
-}
-
-void process_operator_stack(struct infix_params *params)
-{
-    for (;params->op_count > 0;)
-    {
-        *params->postfix_out++ = params->op_stack[--params->op_count];
-    }
-    
-}
 void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
 {
     struct infix_params params;
@@ -91,4 +49,53 @@ void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
     process_operator_stack(&params);
     
     *params.postfix_out = '\0';
+}
+
+static void process_left_paren(struct infix_params* params)
+{
+    params->op_stack[params->op_count++] = *params->infix_in;
+}
+
+static void process_right_paren(struct infix_params* params)
+{
+    for (; params->op_count > 0;)
+    {
+        char op = params->op_stack[--params->op_count];
+        if (params->op_stack[params->op_count] != LEFT_PAREN)
+        {
+            *params->postfix_out++ = op;
+        }
+        else
+        {
+            break;
+        }
+    }
+}
+
+static void process_variable(struct infix_params* params)
+{
+    *params->postfix_out++ = *params->infix_in;
+}
+
+static void process_operator(struct infix_params *params)
+{
+    char current_op = *params->infix_in;
+    if (params->op_count > 0)
+    {
+        char top_op = params->op_stack[params->op_count - 1];
+        if (top_op == OP_MULT && current_op == OP_ADD)
+        {
+            *params->postfix_out++ = params->op_stack[--params->op_count];
+        }
+    }
+    params->op_stack[params->op_count++] = current_op;
+}
+
+static void process_operator_stack(struct infix_params *params)
+{
+    for (;params->op_count > 0;)
+    {
+        *params->postfix_out++ = params->op_stack[--params->op_count];
+    }
+    
 }
