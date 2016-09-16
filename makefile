@@ -1,4 +1,4 @@
-CFLAGS=-Wall -std=c99 -O0 -g $(shell pkg-config --cflags check)
+CFLAGS=-Wall -Wextra -std=c99 -O0 -g $(shell pkg-config --cflags check)
 CHECK_LIBS=$(shell pkg-config --libs check)
 
 .PHONEY : all
