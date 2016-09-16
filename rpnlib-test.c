@@ -5,18 +5,27 @@
 #include <stdbool.h>
 
 
-START_TEST(testtesttest)
+START_TEST(when_infix_is_a_plus_b_then_postfix_is_ab_plus)
 
+    const char* infix = "a+b";
+    const char* expected_postfix = "ab+";
+    char actual_postfix[100];
+
+    rpn_convert_infix_to_postfix(infix, actual_postfix, sizeof actual_postfix);
+
+    ck_assert_str_eq(actual_postfix, expected_postfix);
 
 END_TEST
+
 
 int main(void)
 {
     Suite *suite = suite_create("Core");
-    TCase *testcase = tcase_create("Core");
     
+    TCase *testcase = tcase_create("Core");
     suite_add_tcase(suite, testcase);
-    tcase_add_test(testcase, testtesttest);
+
+    tcase_add_test(testcase, when_infix_is_a_plus_b_then_postfix_is_ab_plus);
 
     SRunner *suite_runner = srunner_create(suite);
     srunner_run_all(suite_runner, CK_ENV);    
