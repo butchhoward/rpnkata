@@ -2,57 +2,93 @@
 #include <string.h>
 #include <ctype.h>
 
+const char LEFT_PAREN = '(';
+const char RIGHT_PAREN = ')';
+const char OP_ADD = '+';
+const char OP_MULT = '*';
 
-
-
-void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
+struct infix_params 
 {
-    
-    char* postfix_out = postfix;
+    const char* infix_in;
     char op_stack[100];
-    int op_count = 0;    
-    for (const char* infix_in = infix; *infix_in; ++infix_in)
+    int op_count;
+    char* postfix_out;
+};
+
+void process_left_paren(struct infix_params* params)
+{
+    params->op_stack[params->op_count++] = *params->infix_in;
+}
+
+void process_right_paren(struct infix_params* params)
+{
+    for (; params->op_count > 0;)
     {
-        if(*infix_in == '(')
+        char op = params->op_stack[--params->op_count];
+        if (params->op_stack[params->op_count] != LEFT_PAREN)
         {
-            op_stack[op_count++] = *infix_in;
+            *params->postfix_out++ = op;
         }
-        else if(*infix_in == ')')
-        {
-            for (;op_count > 0;)
-            {
-                char op = op_stack[--op_count];
-                if (op_stack[op_count] != '(')
-                {
-                    *postfix_out++ = op;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-        else if (isalpha(*infix_in))
-        {
-            *postfix_out++ = *infix_in;
-         }
         else
         {
-            char current_op = *infix_in;
-            if (op_count > 0 )
-            {
-                char top_op = op_stack[op_count - 1];
-                if (top_op == '*' && current_op == '+' )
-                {
-                    *postfix_out++ = op_stack[--op_count];
-                }
-            }
-            op_stack[op_count++] = current_op;
+            break;
         }
     }
-    for (;op_count > 0;)
+}
+
+void process_variable(struct infix_params* params)
+{
+    *params->postfix_out++ = *params->infix_in;
+}
+
+void process_operator(struct infix_params *params)
+{
+    char current_op = *params->infix_in;
+    if (params->op_count > 0)
     {
-        *postfix_out++ = op_stack[--op_count];
+        char top_op = params->op_stack[params->op_count - 1];
+        if (top_op == OP_MULT && current_op == OP_ADD)
+        {
+            *params->postfix_out++ = params->op_stack[--params->op_count];
+        }
     }
-    *postfix_out = '\0';
+    params->op_stack[params->op_count++] = current_op;
+}
+
+void process_operator_stack(struct infix_params *params)
+{
+    for (;params->op_count > 0;)
+    {
+        *params->postfix_out++ = params->op_stack[--params->op_count];
+    }
+    
+}
+void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
+{
+    struct infix_params params;
+    params.postfix_out = postfix;
+    params.op_count = 0;
+
+    for (params.infix_in = infix; *params.infix_in; ++params.infix_in)
+    {
+        if(*params.infix_in == LEFT_PAREN)
+        {
+            process_left_paren(&params);
+        }
+        else if(*params.infix_in == RIGHT_PAREN)
+        {
+            process_right_paren(&params);
+        }
+        else if (isalpha(*params.infix_in))
+        {
+            process_variable(&params);
+        }
+        else
+        {
+            process_operator(&params);
+        }
+    }
+    process_operator_stack(&params);
+    
+    *params.postfix_out = '\0';
 }
