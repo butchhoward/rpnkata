@@ -13,7 +13,6 @@ struct infix_to_postfix {
     ,{.infix="c+d", .postfix="cd+"}
 };
 
-
 START_TEST(when_infix_is_then_postfix_is)
 
     char actual_postfix[100];
@@ -24,42 +23,6 @@ START_TEST(when_infix_is_then_postfix_is)
 
 END_TEST
 
-START_TEST(when_infix_is_a_plus_b_then_postfix_is_ab_plus)
-
-    const char* infix = "a+b";
-    const char* expected_postfix = "ab+";
-    char actual_postfix[100];
-
-    rpn_convert_infix_to_postfix(infix, actual_postfix);
-
-    ck_assert_str_eq(actual_postfix, expected_postfix);
-
-END_TEST
-
-START_TEST(when_infix_is_a_minus_b_then_postfix_is_ab_minus)
-
-    const char* infix = "a-b";
-    const char* expected_postfix = "ab-";
-    char actual_postfix[100];
-
-    rpn_convert_infix_to_postfix(infix, actual_postfix);
-
-    ck_assert_str_eq(actual_postfix, expected_postfix);
-
-END_TEST
-
-
-START_TEST(when_infix_is_c_plus_d_then_postfix_is_cd_plus)
-
-    const char* infix = "c+d";
-    const char* expected_postfix = "cd+";
-    char actual_postfix[100];
-
-    rpn_convert_infix_to_postfix(infix, actual_postfix);
-
-    ck_assert_str_eq(actual_postfix, expected_postfix);
-
-END_TEST
 
 int main(void)
 {
@@ -67,10 +30,6 @@ int main(void)
     
     TCase *testcase = tcase_create("Core");
     suite_add_tcase(suite, testcase);
-
-    tcase_add_test(testcase, when_infix_is_a_plus_b_then_postfix_is_ab_plus);
-    tcase_add_test(testcase, when_infix_is_a_minus_b_then_postfix_is_ab_minus);
-    tcase_add_test(testcase, when_infix_is_c_plus_d_then_postfix_is_cd_plus);
 
     tcase_add_loop_test(testcase, when_infix_is_then_postfix_is, 0, sizeof infix_to_postfix_data / sizeof infix_to_postfix_data[0]);
 
