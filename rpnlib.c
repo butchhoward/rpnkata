@@ -13,7 +13,26 @@ void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
     int op_count = 0;    
     for (const char* infix_in = infix; *infix_in; ++infix_in)
     {
-        if (isalpha(*infix_in))
+        if(*infix_in == '(')
+        {
+            op_stack[op_count++] = *infix_in;
+        }
+        else if(*infix_in == ')')
+        {
+            for (;op_count > 0;)
+            {
+                char op = op_stack[--op_count];
+                if (op_stack[op_count] != '(')
+                {
+                    *postfix_out++ = op;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        else if (isalpha(*infix_in))
         {
             *postfix_out++ = *infix_in;
          }

@@ -15,6 +15,7 @@ struct infix_to_postfix {
     ,{.infix="c*d", .postfix="cd*"}
     ,{.infix="a*c+d", .postfix="ac*d+"}
     ,{.infix="a+c*d", .postfix="acd*+"}
+    ,{.infix="(a+c)*d", .postfix="ac+d*"}
 };
 
 START_TEST(when_infix_is_then_postfix_is)
