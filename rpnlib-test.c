@@ -19,16 +19,18 @@ struct infix_to_postfix {
      {.infix="a+b", .postfix="ab+"}
     ,{.infix="a-b", .postfix="ab-"}
     ,{.infix="c+d", .postfix="cd+"}
-    ,{.infix="a+c+d", .postfix="acd++"}
+    ,{.infix="a+c+d", .postfix="ac+d+"}
     ,{.infix="c*d", .postfix="cd*"}
     ,{.infix="a*c+d", .postfix="ac*d+"}
     ,{.infix="a+c*d", .postfix="acd*+"}
     ,{.infix="(a+c)*d", .postfix="ac+d*"}
     ,{.infix="a+(c*d)", .postfix="acd*+"}
-    ,{.infix="a+b-c*d", .postfix="abcd*-+"}
-    ,{.infix="a+b*c-d", .postfix="abc*d-+"}
-    ,{.infix="a+b/c-d", .postfix="abc/d-+"}
-    ,{.infix="c+d*b/(a-e)", .postfix="cdbae-/*+"}
+    ,{.infix="a+b-c*d", .postfix="ab+cd*-"}
+    ,{.infix="a+b*c-d", .postfix="abc*+d-"}
+    ,{.infix="a+b/c-d", .postfix="abc/+d-"}
+    ,{.infix="c+d*b/(a-e)", .postfix="cdb*ae-/+"}
+    ,{.infix="c+d*b/(a-e)^b^c", .postfix="cdb*ae-bc^^/+"} //example from https://en.wikipedia.org/wiki/Shunting-yard_algorithm
+    ,{.infix="(a+g)*(b+a+c)^(c+e*d^f)", .postfix="ag+ba+c+cedf^*+^*"} //the example from the kata doc
 };
 
 START_TEST(when_infix_is_then_postfix_is)
