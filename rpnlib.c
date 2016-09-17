@@ -7,6 +7,7 @@ const char RIGHT_PAREN = ')';
 const char OP_ADD = '+';
 const char OP_MULT = '*';
 const char OP_MINUS = '-';
+const char OP_DIV = '/';
 
 struct infix_params 
 {
@@ -84,7 +85,7 @@ static void process_operator(struct infix_params *params)
     if (params->op_count > 0)
     {
         char top_op = params->op_stack[params->op_count - 1];
-        if (top_op == OP_MULT && (current_op == OP_ADD || current_op == OP_MINUS))
+        if ((top_op == OP_MULT || top_op == OP_DIV)&& (current_op == OP_ADD || current_op == OP_MINUS))
         {
             *params->postfix_out++ = params->op_stack[--params->op_count];
         }
