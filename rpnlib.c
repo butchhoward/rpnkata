@@ -27,8 +27,8 @@ const op_info_t op_data_nil = { .op='\0', .precedence = 0};
 const op_info_t op_data[] = {
      {.op='+', .precedence=1}
     ,{.op='-', .precedence=2}
-    ,{.op='*', .precedence=1}
-    ,{.op='/', .precedence=1}
+    ,{.op='*', .precedence=3}
+    ,{.op='/', .precedence=4}
 };
 
 const int op_data_count = sizeof op_data / sizeof op_data[0];
@@ -115,9 +115,10 @@ static void process_operator(struct infix_params *params)
     {
         op_info_t top_op = find_op( params->op_stack[params->op_count - 1] );
         
-        if ((top_op.op == OP_MULT || top_op.op == OP_DIV) && (current_op.op == OP_ADD || current_op.op == OP_MINUS))
+        if ( current_op.precedence < top_op.precedence )
         {
-            *params->postfix_out++ = params->op_stack[--params->op_count];
+            *params->postfix_out++ = top_op.op;
+            --params->op_count;
         }
     }
     params->op_stack[params->op_count++] = current_op.op;
