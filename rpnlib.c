@@ -17,6 +17,22 @@ struct infix_params
     char* postfix_out;
 };
 
+typedef struct op_info {
+    char op;
+    int precedence;
+} op_info_t;
+
+const op_info_t op_data_nil = { .op='\0', .precedence = 0};
+
+const op_info_t op_data[] = {
+     {.op='+', .precedence=1}
+    ,{.op='-', .precedence=2}
+    ,{.op='*', .precedence=1}
+    ,{.op='/', .precedence=1}
+};
+
+const int op_data_count = sizeof op_data / sizeof op_data[0];
+
 static void process_left_paren(struct infix_params* params);
 static void process_right_paren(struct infix_params* params);
 static void process_variable(struct infix_params* params);
@@ -79,18 +95,32 @@ static void process_variable(struct infix_params* params)
     *params->postfix_out++ = *params->infix_in;
 }
 
+op_info_t find_op(char op)
+{
+    for (int i = 0; i < op_data_count; ++i)
+    {
+        if (op_data[i].op == op)
+        {
+            return op_data[i];
+        }
+    }
+
+    return op_data_nil;
+}
+
 static void process_operator(struct infix_params *params)
 {
-    char current_op = *params->infix_in;
+    op_info_t current_op = find_op(*params->infix_in);
     if (params->op_count > 0)
     {
-        char top_op = params->op_stack[params->op_count - 1];
-        if ((top_op == OP_MULT || top_op == OP_DIV)&& (current_op == OP_ADD || current_op == OP_MINUS))
+        op_info_t top_op = find_op( params->op_stack[params->op_count - 1] );
+        
+        if ((top_op.op == OP_MULT || top_op.op == OP_DIV) && (current_op.op == OP_ADD || current_op.op == OP_MINUS))
         {
             *params->postfix_out++ = params->op_stack[--params->op_count];
         }
     }
-    params->op_stack[params->op_count++] = current_op;
+    params->op_stack[params->op_count++] = current_op.op;
 }
 
 static void process_operator_stack(struct infix_params *params)
