@@ -28,6 +28,7 @@ struct infix_to_postfix {
     ,{.infix="a+b-c*d", .postfix="abcd*-+"}
     ,{.infix="a+b*c-d", .postfix="abc*d-+"}
     ,{.infix="a+b/c-d", .postfix="abc/d-+"}
+    ,{.infix="c+d*b/(a-e)", .postfix="cdbae-/*+"}
 };
 
 START_TEST(when_infix_is_then_postfix_is)
