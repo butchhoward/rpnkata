@@ -3,6 +3,13 @@
 #include <string.h>
 #include <ctype.h>
 
+
+//todo: refactor the tests for parens, ops, and variables
+//todo: check for null output buffer and buffer overrun
+//todo: check for invalid variables or operators
+//todo: ignore spaces
+//todo: convert postfix to infix
+
 const char LEFT_PAREN = '(';
 const char RIGHT_PAREN = ')';
 
@@ -118,15 +125,14 @@ static op_info_t find_op(char op)
     return op_data_nil;
 }
 
-static void process_operator(struct infix_params *params)
+static void process_current_operator(op_info_t* current_op, struct infix_params* params)
 {
-    op_info_t current_op = find_op(*params->infix_in);
     for (;params->op_count > 0;)
     {
         op_info_t top_op = find_op( params->op_stack[params->op_count - 1] );
         
-        if ( (current_op.associativity == LEFT && current_op.precedence <= top_op.precedence) || 
-             (current_op.associativity == RIGHT && current_op.precedence < top_op.precedence)
+        if ( (current_op->associativity == LEFT && current_op->precedence <= top_op.precedence) || 
+             (current_op->associativity == RIGHT && current_op->precedence < top_op.precedence)
         )
         {
             *params->postfix_out++ = top_op.op;
@@ -140,7 +146,13 @@ static void process_operator(struct infix_params *params)
             break;
         }
     }
-    params->op_stack[params->op_count++] = current_op.op;
+    params->op_stack[params->op_count++] = current_op->op;
+}
+static void process_operator(struct infix_params *params)
+{
+    op_info_t current_op = find_op(*params->infix_in);
+    process_current_operator(&current_op, params);
+
     params->op_stack[params->op_count] = '\0';
 }
 
