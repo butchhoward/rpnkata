@@ -34,11 +34,11 @@ typedef struct op_info {
 const op_info_t op_data_nil = { .op='\0', .precedence = 0, .associativity=NONE};
 
 const op_info_t op_data[] = {
-     {.op='+', .precedence=2, .associativity=LEFT}
+     {.op='+', .precedence=1, .associativity=LEFT}
     ,{.op='-', .precedence=2, .associativity=LEFT}
     ,{.op='*', .precedence=3, .associativity=LEFT}
-    ,{.op='/', .precedence=3, .associativity=LEFT}
-    ,{.op='^', .precedence=4, .associativity=RIGHT}
+    ,{.op='/', .precedence=4, .associativity=LEFT}
+    ,{.op='^', .precedence=5, .associativity=RIGHT}
 };
 
 const int op_data_count = sizeof op_data / sizeof op_data[0];
