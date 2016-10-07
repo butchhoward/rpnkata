@@ -33,6 +33,7 @@ struct infix_to_postfix {
     ,{.infix="c+d*b/(a-e)", .postfix="cdbae-/*+"}
     ,{.infix="c+d*b/(a-e)^b^c", .postfix="cdbae-bc^^/*+"} //example from https://en.wikipedia.org/wiki/Shunting-yard_algorithm (result modified to meet kata precedence rules)
     ,{.infix="(a+g)*(b+a+c)^(c+e*d^f)", .postfix="ag+ba+c+cedf^*+^*"} //the example from the kata doc
+    ,{.infix=" a + c * d", .postfix="acd*+"} //confirm spaces ignored
 };
 
 START_TEST(when_infix_is_then_postfix_is)

@@ -7,7 +7,6 @@
 
 //todo: check for null output buffer and buffer overrun
 //todo: check for invalid variables or operators
-//todo: ignore spaces
 //todo: convert postfix to infix
 
 const char LEFT_PAREN = '(';
