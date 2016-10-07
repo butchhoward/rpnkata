@@ -63,12 +63,12 @@ typedef struct dispatch_info_t {
 } dispatch_info_t;
 
 dispatch_info_t dispatch[] = {
-    {.check=check_for_left_paren, .process=process_left_paren},
-    {.check=check_for_right_paren, .process=process_right_paren},
-    {.check=check_for_variable, .process=process_variable},
-    {.check=check_for_operator, .process=process_operator},
-    {.check=check_for_space, .process=process_space},
-    {.check=NULL, .process=NULL}
+    {.check=check_for_left_paren, .process=process_left_paren}
+    ,{.check=check_for_right_paren, .process=process_right_paren}
+    ,{.check=check_for_variable, .process=process_variable}
+    ,{.check=check_for_operator, .process=process_operator}
+    ,{.check=check_for_space, .process=process_space}
+    ,{.check=NULL, .process=NULL}
 };
 
 static void process_operator_stack(infix_result_t *params);
@@ -195,23 +195,33 @@ static bool check_for_operator(char c)
     return op_info.op != op_data_nil.op;
 }
 
+static bool top_op_on_stack_has_correct_precendence_then_pop_it_to_the_output(op_info_t* current_op, infix_result_t* params)
+{
+    bool has_op_that_meets_precendence_rules = false;
+
+    op_info_t top_op = find_op( params->op_stack[params->op_count - 1] );
+        
+    if ( (current_op->associativity == LEFT && current_op->precedence <= top_op.precedence) || 
+         (current_op->associativity == RIGHT && current_op->precedence < top_op.precedence)
+    )
+    {
+        *params->postfix_out++ = top_op.op;
+        *params->postfix_out = '\0';
+
+        --params->op_count;
+        params->op_stack[params->op_count] = '\0';
+
+        has_op_that_meets_precendence_rules = true;
+    }
+
+    return has_op_that_meets_precendence_rules;
+}
+
 static void process_current_operator(op_info_t* current_op, infix_result_t* params)
 {
     for (;params->op_count > 0;)
     {
-        op_info_t top_op = find_op( params->op_stack[params->op_count - 1] );
-        
-        if ( (current_op->associativity == LEFT && current_op->precedence <= top_op.precedence) || 
-             (current_op->associativity == RIGHT && current_op->precedence < top_op.precedence)
-        )
-        {
-            *params->postfix_out++ = top_op.op;
-            *params->postfix_out = '\0';
-
-            --params->op_count;
-            params->op_stack[params->op_count] = '\0';
-        }
-        else
+        if(!top_op_on_stack_has_correct_precendence_then_pop_it_to_the_output(current_op,params))
         {
             break;
         }
