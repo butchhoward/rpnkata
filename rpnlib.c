@@ -16,12 +16,12 @@ const char RIGHT_PAREN = ')';
 
 #define OP_STACK_SIZE 100
 
-struct infix_result 
+typedef struct infix_result_t 
 {
     char op_stack[OP_STACK_SIZE];
     int op_count;
     char* postfix_out;
-};
+} infix_result_t;
 
 enum associativity_t {NONE, LEFT, RIGHT};
 
@@ -44,22 +44,40 @@ const op_info_t op_data[] = {
 const int op_data_count = sizeof op_data / sizeof op_data[0];
 
 static bool check_for_left_paren(char var);
-static void process_left_paren(char var, struct infix_result* params);
+static void process_left_paren(char var, infix_result_t* params);
 
 static bool check_for_right_paren(char var);
-static void process_right_paren(char var, struct infix_result* params);
+static void process_right_paren(char var, infix_result_t* params);
 
 static bool check_for_variable(char var);
-static void process_variable(char var, struct infix_result* params);
+static void process_variable(char var, infix_result_t* params);
 
 static bool check_for_operator(char var);
-static void process_operator(char op, struct infix_result *params);
+static void process_operator(char op, infix_result_t *params);
 
-static void process_operator_stack(struct infix_result *params);
+static void process_a_character(char infix_in, infix_result_t* params);
+
+typedef bool (*checkfn_t)(char c);
+typedef void (*processfn_t)(char c, infix_result_t* p);
+
+typedef struct dispatch_info_t {
+    checkfn_t check;
+    processfn_t process;
+} dispatch_info_t;
+
+dispatch_info_t dispatch[] = {
+    {.check=check_for_left_paren, .process=process_left_paren},
+    {.check=check_for_right_paren, .process=process_right_paren},
+    {.check=check_for_variable, .process=process_variable},
+    {.check=check_for_operator, .process=process_operator},
+    {.check=NULL, .process=NULL}
+};
+
+static void process_operator_stack(infix_result_t *params);
 
 void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
 {
-    struct infix_result params;
+    infix_result_t params;
     params.postfix_out = postfix;
     params.op_count = 0;
     memset(params.op_stack, '\0', OP_STACK_SIZE);
@@ -67,31 +85,35 @@ void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
 
     for (const char *infix_in = infix; *infix_in; ++infix_in)
     {
-        if(check_for_left_paren(*infix_in))
-        {
-            process_left_paren(*infix_in, &params);
-        }
-        else if(check_for_right_paren(*infix_in))
-        {
-            process_right_paren(*infix_in, &params);
-        }
-        else if (check_for_variable(*infix_in))
-        {
-            process_variable(*infix_in, &params);
-        }
-        else if (check_for_operator(*infix_in))
-        {
-            process_operator(*infix_in, &params);
-        }
-        else
-        {
-            //ignore the character
-        }
-
+        process_a_character(*infix_in, &params);
     }
     process_operator_stack(&params);
     
     *params.postfix_out = '\0';
+}
+
+static void process_a_character(char infix_in, infix_result_t* params)
+{
+    if(check_for_left_paren(infix_in))
+    {
+        process_left_paren(infix_in, params);
+    }
+    else if(check_for_right_paren(infix_in))
+    {
+        process_right_paren(infix_in, params);
+    }
+    else if (check_for_variable(infix_in))
+    {
+        process_variable(infix_in, params);
+    }
+    else if (check_for_operator(infix_in))
+    {
+        process_operator(infix_in, params);
+    }
+    else
+    {
+        //ignore the character
+    }
 }
 
 static bool check_for_left_paren(char var)
@@ -99,7 +121,7 @@ static bool check_for_left_paren(char var)
     return LEFT_PAREN == var;
 }
 
-static void process_left_paren(char var, struct infix_result* params)
+static void process_left_paren(char var, infix_result_t* params)
 {
     params->op_stack[params->op_count++] = var;
     params->op_stack[params->op_count] = '\0';
@@ -110,7 +132,7 @@ static bool check_for_right_paren(char var)
     return RIGHT_PAREN == var;
 }
 
-static void process_right_paren(char var, struct infix_result* params)
+static void process_right_paren(char var, infix_result_t* params)
 {
     (void)var;
 
@@ -135,7 +157,7 @@ static bool check_for_variable(char var)
     return isalpha(var);
 }
 
-static void process_variable(char var, struct infix_result* params)
+static void process_variable(char var, infix_result_t* params)
 {
     *params->postfix_out++ = var;
     *params->postfix_out = '\0';
@@ -160,7 +182,7 @@ static bool check_for_operator(char op)
     return op_info.op != op_data_nil.op;
 }
 
-static void process_current_operator(op_info_t* current_op, struct infix_result* params)
+static void process_current_operator(op_info_t* current_op, infix_result_t* params)
 {
     for (;params->op_count > 0;)
     {
@@ -183,7 +205,7 @@ static void process_current_operator(op_info_t* current_op, struct infix_result*
     }
     params->op_stack[params->op_count++] = current_op->op;
 }
-static void process_operator(char infix_in, struct infix_result *params)
+static void process_operator(char infix_in, infix_result_t *params)
 {
     op_info_t current_op = find_op(infix_in);
     process_current_operator(&current_op, params);
@@ -191,7 +213,7 @@ static void process_operator(char infix_in, struct infix_result *params)
     params->op_stack[params->op_count] = '\0';
 }
 
-static void process_operator_stack(struct infix_result *params)
+static void process_operator_stack(infix_result_t *params)
 {
     for (;params->op_count > 0;)
     {
