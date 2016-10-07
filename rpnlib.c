@@ -34,9 +34,8 @@ const op_info_t op_data[] = {
     ,{.op='*', .precedence=3, .associativity=LEFT}
     ,{.op='/', .precedence=4, .associativity=LEFT}
     ,{.op='^', .precedence=5, .associativity=RIGHT}
+    ,{.op='\0', .precedence=0, .associativity=NONE}
 };
-
-const int op_data_count = sizeof op_data / sizeof op_data[0];
 
 static bool check_for_left_paren(char c);
 static void process_left_paren(char paren, infix_result_t* params);
@@ -179,7 +178,7 @@ static void process_variable(char var, infix_result_t* params)
 
 static op_info_t find_op(char op)
 {
-    for (int i = 0; i < op_data_count; ++i)
+    for (int i = 0; op_data[i].op != '\0'; ++i)
     {
         if (op_data[i].op == op)
         {
