@@ -6,17 +6,14 @@
 
 
 //todo: check for null output buffer and buffer overrun
-//todo: check for invalid variables or operators
 //todo: convert postfix to infix
 
 const char LEFT_PAREN = '(';
 const char RIGHT_PAREN = ')';
 
-#define OP_STACK_SIZE 100
-
 typedef struct infix_result_t 
 {
-    char op_stack[OP_STACK_SIZE];
+    char* op_stack;
     int op_count;
     char* postfix_out;
 } infix_result_t;
@@ -79,10 +76,19 @@ static void process_operator_stack(infix_result_t *params);
 
 void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
 {
+    if(NULL == postfix)
+    {
+        return;
+    }
+
+    size_t op_stack_buffer_len = strlen(infix+1);
+    char op_stack_buffer[op_stack_buffer_len];
+
     infix_result_t params;
     params.postfix_out = postfix;
     params.op_count = 0;
-    memset(params.op_stack, '\0', OP_STACK_SIZE);
+    params.op_stack = &op_stack_buffer[0];
+    memset(params.op_stack, '\0', op_stack_buffer_len);
     *params.postfix_out = '\0';
 
     for (const char *infix_in = infix; *infix_in; ++infix_in)
@@ -162,7 +168,7 @@ static void process_right_paren(char paren, infix_result_t* params)
 
 static bool check_for_variable(char c)
 {
-    return isalpha(c);
+    return islower(c);
 }
 
 static void process_variable(char var, infix_result_t* params)

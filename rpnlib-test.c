@@ -35,6 +35,7 @@ struct infix_to_postfix {
     ,{.infix="(a+g)*(b+a+c)^(c+e*d^f)", .postfix="ag+ba+c+cedf^*+^*"} //the example from the kata doc
     ,{.infix=" a + c * d", .postfix="acd*+"} //confirm spaces ignored
     ,{.infix="a$c%d", .postfix=""}
+    ,{.infix="A+b", .postfix=""}
 };
 
 START_TEST(when_infix_is_then_postfix_is)
