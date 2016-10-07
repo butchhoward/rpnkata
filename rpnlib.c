@@ -53,7 +53,10 @@ static void process_variable(char var, infix_result_t* params);
 static bool check_for_operator(char c);
 static void process_operator(char op, infix_result_t *params);
 
-static void process_a_character(char c, infix_result_t* params);
+static bool check_for_space(char c);
+static void process_space(char c, infix_result_t *params);
+
+static bool process_a_character(char c, infix_result_t* params);
 
 typedef bool (*checkfn_t)(char c);
 typedef void (*processfn_t)(char c, infix_result_t* p);
@@ -68,6 +71,7 @@ dispatch_info_t dispatch[] = {
     {.check=check_for_right_paren, .process=process_right_paren},
     {.check=check_for_variable, .process=process_variable},
     {.check=check_for_operator, .process=process_operator},
+    {.check=check_for_space, .process=process_space},
     {.check=NULL, .process=NULL}
 };
 
@@ -83,22 +87,41 @@ void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
 
     for (const char *infix_in = infix; *infix_in; ++infix_in)
     {
-        process_a_character(*infix_in, &params);
+        if (!process_a_character(*infix_in, &params))
+        {
+            *postfix = '\0';
+            return;
+        }
     }
     process_operator_stack(&params);
     
     *params.postfix_out = '\0';
 }
 
-static void process_a_character(char c, infix_result_t* params)
+static bool process_a_character(char c, infix_result_t* params)
 {
+    bool dispatched = false;
     for(int i = 0;dispatch[i].check != NULL;++i)
     {
         if(dispatch[i].check(c))
         {
+            dispatched = true;
             dispatch[i].process(c, params);
         }
     }   
+    return dispatched;
+}
+
+static bool check_for_space(char c)
+{
+    return isspace(c);
+}
+
+static void process_space(char c, infix_result_t *params)
+{
+    (void)c;
+    (void)params;
+    return;
 }
 
 static bool check_for_left_paren(char c)
