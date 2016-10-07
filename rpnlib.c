@@ -5,7 +5,6 @@
 #include <stdbool.h>
 
 
-//todo: refactor the tests for parens, ops, and variables
 //todo: check for null output buffer and buffer overrun
 //todo: check for invalid variables or operators
 //todo: ignore spaces
@@ -43,19 +42,19 @@ const op_info_t op_data[] = {
 
 const int op_data_count = sizeof op_data / sizeof op_data[0];
 
-static bool check_for_left_paren(char var);
-static void process_left_paren(char var, infix_result_t* params);
+static bool check_for_left_paren(char c);
+static void process_left_paren(char paren, infix_result_t* params);
 
-static bool check_for_right_paren(char var);
-static void process_right_paren(char var, infix_result_t* params);
+static bool check_for_right_paren(char c);
+static void process_right_paren(char paren, infix_result_t* params);
 
-static bool check_for_variable(char var);
+static bool check_for_variable(char c);
 static void process_variable(char var, infix_result_t* params);
 
-static bool check_for_operator(char var);
+static bool check_for_operator(char c);
 static void process_operator(char op, infix_result_t *params);
 
-static void process_a_character(char infix_in, infix_result_t* params);
+static void process_a_character(char c, infix_result_t* params);
 
 typedef bool (*checkfn_t)(char c);
 typedef void (*processfn_t)(char c, infix_result_t* p);
@@ -92,49 +91,36 @@ void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
     *params.postfix_out = '\0';
 }
 
-static void process_a_character(char infix_in, infix_result_t* params)
+static void process_a_character(char c, infix_result_t* params)
 {
-    if(check_for_left_paren(infix_in))
+    for(int i = 0;dispatch[i].check != NULL;++i)
     {
-        process_left_paren(infix_in, params);
-    }
-    else if(check_for_right_paren(infix_in))
-    {
-        process_right_paren(infix_in, params);
-    }
-    else if (check_for_variable(infix_in))
-    {
-        process_variable(infix_in, params);
-    }
-    else if (check_for_operator(infix_in))
-    {
-        process_operator(infix_in, params);
-    }
-    else
-    {
-        //ignore the character
-    }
+        if(dispatch[i].check(c))
+        {
+            dispatch[i].process(c, params);
+        }
+    }   
 }
 
-static bool check_for_left_paren(char var)
+static bool check_for_left_paren(char c)
 {
-    return LEFT_PAREN == var;
+    return LEFT_PAREN == c;
 }
 
-static void process_left_paren(char var, infix_result_t* params)
+static void process_left_paren(char paren, infix_result_t* params)
 {
-    params->op_stack[params->op_count++] = var;
+    params->op_stack[params->op_count++] = paren;
     params->op_stack[params->op_count] = '\0';
 }
 
-static bool check_for_right_paren(char var)
+static bool check_for_right_paren(char c)
 {
-    return RIGHT_PAREN == var;
+    return RIGHT_PAREN == c;
 }
 
-static void process_right_paren(char var, infix_result_t* params)
+static void process_right_paren(char paren, infix_result_t* params)
 {
-    (void)var;
+    (void)paren;
 
     for (; params->op_count > 0;)
     {
@@ -152,9 +138,9 @@ static void process_right_paren(char var, infix_result_t* params)
     params->op_stack[params->op_count] = '\0';
 }
 
-static bool check_for_variable(char var)
+static bool check_for_variable(char c)
 {
-    return isalpha(var);
+    return isalpha(c);
 }
 
 static void process_variable(char var, infix_result_t* params)
@@ -176,9 +162,9 @@ static op_info_t find_op(char op)
     return op_data_nil;
 }
 
-static bool check_for_operator(char op)
+static bool check_for_operator(char c)
 {
-    op_info_t op_info = find_op(op);
+    op_info_t op_info = find_op(c);
     return op_info.op != op_data_nil.op;
 }
 
@@ -205,9 +191,9 @@ static void process_current_operator(op_info_t* current_op, infix_result_t* para
     }
     params->op_stack[params->op_count++] = current_op->op;
 }
-static void process_operator(char infix_in, infix_result_t *params)
+static void process_operator(char op, infix_result_t *params)
 {
-    op_info_t current_op = find_op(infix_in);
+    op_info_t current_op = find_op(op);
     process_current_operator(&current_op, params);
 
     params->op_stack[params->op_count] = '\0';
