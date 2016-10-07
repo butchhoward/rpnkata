@@ -15,9 +15,8 @@ const char RIGHT_PAREN = ')';
 
 #define OP_STACK_SIZE 100
 
-struct infix_params 
+struct infix_result 
 {
-    const char* infix_in;
     char op_stack[OP_STACK_SIZE];
     int op_count;
     char* postfix_out;
@@ -43,37 +42,37 @@ const op_info_t op_data[] = {
 
 const int op_data_count = sizeof op_data / sizeof op_data[0];
 
-static void process_left_paren(struct infix_params* params);
-static void process_right_paren(struct infix_params* params);
-static void process_variable(struct infix_params* params);
-static void process_operator(struct infix_params *params);
-static void process_operator_stack(struct infix_params *params);
+static void process_left_paren(char var, struct infix_result* params);
+static void process_right_paren(struct infix_result* params);
+static void process_variable(char var, struct infix_result* params);
+static void process_operator(char op, struct infix_result *params);
+static void process_operator_stack(struct infix_result *params);
 
 void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
 {
-    struct infix_params params;
+    struct infix_result params;
     params.postfix_out = postfix;
     params.op_count = 0;
     memset(params.op_stack, '\0', OP_STACK_SIZE);
     *params.postfix_out = '\0';
 
-    for (params.infix_in = infix; *params.infix_in; ++params.infix_in)
+    for (const char *infix_in = infix; *infix_in; ++infix_in)
     {
-        if(*params.infix_in == LEFT_PAREN)
+        if(*infix_in == LEFT_PAREN)
         {
-            process_left_paren(&params);
+            process_left_paren(*infix_in, &params);
         }
-        else if(*params.infix_in == RIGHT_PAREN)
+        else if(*infix_in == RIGHT_PAREN)
         {
             process_right_paren(&params);
         }
-        else if (isalpha(*params.infix_in))
+        else if (isalpha(*infix_in))
         {
-            process_variable(&params);
+            process_variable(*infix_in, &params);
         }
         else
         {
-            process_operator(&params);
+            process_operator(*infix_in, &params);
         }
 
     }
@@ -82,13 +81,13 @@ void rpn_convert_infix_to_postfix(const char* infix, char* postfix)
     *params.postfix_out = '\0';
 }
 
-static void process_left_paren(struct infix_params* params)
+static void process_left_paren(char infix_in, struct infix_result* params)
 {
-    params->op_stack[params->op_count++] = *params->infix_in;
+    params->op_stack[params->op_count++] = infix_in;
     params->op_stack[params->op_count] = '\0';
 }
 
-static void process_right_paren(struct infix_params* params)
+static void process_right_paren(struct infix_result* params)
 {
     for (; params->op_count > 0;)
     {
@@ -106,9 +105,9 @@ static void process_right_paren(struct infix_params* params)
     params->op_stack[params->op_count] = '\0';
 }
 
-static void process_variable(struct infix_params* params)
+static void process_variable(char infix_in, struct infix_result* params)
 {
-    *params->postfix_out++ = *params->infix_in;
+    *params->postfix_out++ = infix_in;
     *params->postfix_out = '\0';
 }
 
@@ -125,7 +124,7 @@ static op_info_t find_op(char op)
     return op_data_nil;
 }
 
-static void process_current_operator(op_info_t* current_op, struct infix_params* params)
+static void process_current_operator(op_info_t* current_op, struct infix_result* params)
 {
     for (;params->op_count > 0;)
     {
@@ -148,15 +147,15 @@ static void process_current_operator(op_info_t* current_op, struct infix_params*
     }
     params->op_stack[params->op_count++] = current_op->op;
 }
-static void process_operator(struct infix_params *params)
+static void process_operator(char infix_in, struct infix_result *params)
 {
-    op_info_t current_op = find_op(*params->infix_in);
+    op_info_t current_op = find_op(infix_in);
     process_current_operator(&current_op, params);
 
     params->op_stack[params->op_count] = '\0';
 }
 
-static void process_operator_stack(struct infix_params *params)
+static void process_operator_stack(struct infix_result *params)
 {
     for (;params->op_count > 0;)
     {
